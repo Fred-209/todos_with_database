@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>Todo App</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans">
+    <link rel="stylesheet" href="/stylesheets/whitespace-reset.css">
+    <link rel="stylesheet" href="/stylesheets/application.css">
+    <script src="/javascript/jquery-3.6.0.js"></script>
+    <script src="/javascript/application.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1><a href="/">Todo Tracker</a></h1>
+      <div class="actions">
+        <%== yield_content :header_links %>
+      </div>
+    </header>
+    
+    <% if session[:success]  %>
+      <div class="flash success">
+        <p><%= session.delete(:success) %>
+      </div>
+    <% end %>
+    <% if session[:error] %>
+      <div class="flash error">
+        <% session[:error].each do |error| %>
+          <p><%= error %></p>
+        <% end %>
+        <% session.delete(:error) %>
+      </div>
+    <% end %>
+
+    <main>
+      <%== yield %>
+    </main>
+  </body>
+</html>
