@@ -1,5 +1,5 @@
 <ul id="lists">
-  <% sort_lists(session[:lists]) do |list| %> 
+  <% sort_lists(@lists) do |list| %> 
     <li class=<%= list_completion_status(list) %>>
       <h2><a href="/lists/<%= list[:id] %>"><%= list[:name] %></a></h2>
       <p><%= todo_completion_ratio(list[:todos]) %></p>
