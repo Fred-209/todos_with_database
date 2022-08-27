@@ -3,7 +3,7 @@ require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubis"
 
-require_relative "session_persistence"
+require_relative "database_persistence"
 
 configure do 
   set :erb, :escape_html => true
@@ -12,7 +12,7 @@ configure do
 end
 
 before do
-  @storage = SessionPersistence.new(session)
+  @storage = DatabasePersistence.new(logger)
 end
 
 helpers do 
@@ -134,7 +134,8 @@ end
 
 # Display todos for a single list
 get "/lists/:list_id" do
-  @lists = session[:lists]
+  @lists = @storage.all_lists
+  # @lists = session[:lists]
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
 
