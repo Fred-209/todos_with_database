@@ -1,5 +1,4 @@
 require "sinatra"
-require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubis"
 
@@ -9,6 +8,11 @@ configure do
   set :erb, :escape_html => true
   enable :sessions
   set :session_secret, 'secret'
+end
+
+configure(:development) do
+  require "sinatra/reloader"
+  also_reload "database_persistence.rb"
 end
 
 before do
@@ -134,8 +138,6 @@ end
 
 # Display todos for a single list
 get "/lists/:list_id" do
-  @lists = @storage.all_lists
-  # @lists = session[:lists]
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
 

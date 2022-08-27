@@ -18,13 +18,16 @@ class DatabasePersistence
 
     
     result.map do |tuple|
-      { id: tuple["id"], name: tuple["name"], todos: [] }
+      list_id = tuple["id"].to_i
+      todos = find_todos_for_list(list_id)
+
+      { id: list_id, name: tuple["name"], todos: todos }
     end
   end
 
   def create_new_list(list_name)
-    # id = next_element_id(@session[:lists])
-    # @session[:lists] << {id: id, name: list_name, todos: [] }
+    sql = "INSERT INTO lists (name) VALUES ($1);"
+    query(sql, list_name)
   end
 
   def create_new_todo(list_id, todo_name)
@@ -34,7 +37,8 @@ class DatabasePersistence
   end
 
   def delete_list(id)
-    # @session[:lists].reject! { |list| list[:id] == id }
+    query("DELETE FROM todos WHERE list_id = $1", id)
+    query("DELETE FROM lists WHERE id = $1", id)      
   end
 
   def delete_todo_from_list(list_id, todo_id)
@@ -46,10 +50,12 @@ class DatabasePersistence
     sql = "SELECT * FROM lists WHERE id = $1;"
     result = query(sql, id)
 
-    
     tuple = result.first
-    todos = fetch_todos_from_list(tuple["id"])
-    { id: tuple["id"], name: tuple["name"], todos: todos }
+    list_id = tuple["id"].to_i
+
+    todos = find_todos_for_list(list_id)
+
+    { id: list_id, name: tuple["name"], todos: todos }
   end
 
   def mark_all_todos_as_completed(list_id)
@@ -60,6 +66,8 @@ class DatabasePersistence
   end
 
   def update_list_name(id, new_name)
+    sql = "UPDATE lists SET name = $1 WHERE id = $2;"
+    query(sql, new_name, id)
     # list = find_list(id)
     # list[:name] = new_name
   end
@@ -72,17 +80,15 @@ class DatabasePersistence
 
   private
 
-  def fetch_todos_from_list(list_id)
-    sql = "SELECT * FROM todos WHERE list_id = $1;"
-    result = query(sql, list_id)
-    
-    todos = []
-    result.each do |tuple| 
-      todos << {id: tuple["id"], name: tuple["name"], completed: tuple["completed"] }
+  def find_todos_for_list(list_id)
+    todo_sql = "SELECT * FROM todos WHERE list_id = $1"
+    todos_result = query(todo_sql, list_id )
+
+    todos_result.map do |todo_tuple|
+      { id: todo_tuple["id"].to_i, 
+        name: todo_tuple["name"],
+        completed: todo_tuple["completed"] == 't'
+      }
     end
-    todos.each do |todo|
-      todo[:completed] == 't' ? todo[:completed] = true : todo[:completed] = false
-    end
-    todos
   end
 end
