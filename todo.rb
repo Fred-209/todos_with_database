@@ -19,6 +19,10 @@ before do
   @storage = DatabasePersistence.new(logger)
 end
 
+after do 
+  @storage.disconnect
+end
+
 helpers do 
   
   # Return an array of error msgs if the name is invalid, otherwise return nil.

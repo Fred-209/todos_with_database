@@ -3,8 +3,16 @@ require "pg"
 class DatabasePersistence
   
   def initialize(logger)
-    @db = PG.connect(dbname: "todos")
+    @db = if Sinatra::Base.production? 
+            PG.connect(ENV['DATABASE_URL'])
+          else
+            PG.connect(dbname: "todos")
+          end
     @logger = logger
+  end
+
+  def disconnect
+    @db.close
   end
 
   def query(statement, *params)
@@ -59,23 +67,19 @@ class DatabasePersistence
   end
 
   def mark_all_todos_as_completed(list_id)
-    # list = find_list(list_id)
-    # list[:todos].each do |todo|
-    #   todo[:completed] = true
-    
+    sql = "UPDATE todos SET completed = true WHERE list_id = $1;"
+    query(sql, list_id)
   end
 
   def update_list_name(id, new_name)
     sql = "UPDATE lists SET name = $1 WHERE id = $2;"
     query(sql, new_name, id)
-    # list = find_list(id)
-    # list[:name] = new_name
+   
   end
 
-  def update_todo_status(list_id, todo_id, completion_status)
-    # list = find_list(list_id)
-    # todo = list[:todos].find { |t| t[:id] == todo_id }
-    # todo[:completed] = completion_status
+  def update_todo_status(list_id, todo_id, new_status)
+    sql = "UPDATE todos SET completed = $1 WHERE id = $2 AND list_id = $3;"
+    query(sql, new_status, todo_id, list_id)
   end
 
   private
