@@ -157,7 +157,7 @@ get "/lists/:list_id/edit" do
   erb :edit_list, layout: :layout
 end
 
-# Update an existing todo list
+# Update an existing todo list name
 post "/lists/:list_id" do 
   list_name = params[:list_name].strip
   @list_id = params[:list_id].to_i
@@ -209,8 +209,10 @@ end
 
 # Delete a todo item from a list
 post "/lists/:list_id/todos/:todo_id/delete" do 
+  todo_id = params[:todo_id]
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
+  
   @storage.delete_todo_from_list(@list_id, todo_id)
   
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
